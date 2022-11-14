@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import scipy.signal
+from scipy import signal
 from IPython.display import Audio, display
 import re
 import random
@@ -75,6 +76,42 @@ def extract(wav, t1, t2, fs):
         cut = wav[math.floor(t1*fs):math.floor(t2*fs)]
     tcut = np.arange(len(cut))*(1./fs)
     return cut, tcut
+
+def plot_frequency_response(Wn, b, a, fs, title=None):
+    w, h = signal.freqz(b, a)
+
+    f = (fs/2)*(w/(np.pi))
+    
+    fig = plt.figure(figsize=(15,12))
+
+    ax = fig.add_subplot(2,1,1)
+    ax.plot(f, 20 * np.log10(abs(h)))
+    ax.set_xscale('log')
+    ax.set_title(title)
+    ax.set_xlabel('Frequency [Hz]')
+    ax.set_ylabel('Amplitude [dB]')  
+    ax.grid(which='both', axis='both')
+    if type(Wn) == tuple:
+        ax.axvline(Wn[0], color='green') # cutoff frequency
+        ax.axvline(Wn[1], color='green') # cutoff frequency
+    else:
+        ax.axvline(Wn, color='green') # cutoff frequency
+
+    ax = fig.add_subplot(2,1,2)
+    ax.plot(f, np.unwrap(np.angle(h)))
+    ax.set_xscale('log')
+    ax.set_title(title)
+    ax.set_xlabel('Frequency [Hz]')
+    ax.set_ylabel('Phase [rad]')
+    ax.grid(which='both', axis='both')
+    if type(Wn) == tuple:
+        ax.axvline(Wn[0], color='green') # cutoff frequency
+        ax.axvline(Wn[1], color='green') # cutoff frequency
+    else:
+        ax.axvline(Wn, color='green') # cutoff frequency
+
+    plt.tight_layout()
+    plt.show()
 
 def crosscorrelate(signal, template, fs):
     '''Cross-correlate the template against the signal'''
